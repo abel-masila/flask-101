@@ -121,5 +121,15 @@ def update_book(isbn):
     response.headers["Location"] = "/books/" + str(isbn)
     return response
 
+# DELETE /books/ISBN
+@app.route("/books/<int:isbn>", methods=["DELETE"])
+def delete_book(isbn):
+    i = 0
+    for book in books:
+        if (book["isbn"] == isbn):
+            books.pop(i)
+        i += 1
+    return ""
+
 
 app.run(port=5000)
