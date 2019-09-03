@@ -26,9 +26,8 @@ def helloworld():
 def get_books():
     return jsonify({'books': books})
 
+
 # sanitize user request
-
-
 def validBookObj(bookObj):
     if ("name" in bookObj and "price" in bookObj and "isbn" in bookObj):
         return True
@@ -58,9 +57,9 @@ def add_books():
         response = Response(json.dumps(invalidBookObjErrorResponse),
                             status=400, mimetype="application/json")
         return response
-    # GET /books/ISBN
 
 
+# GET /books/ISBN
 @app.route("/books/<int:isbn>")
 def get_book_by_isbn(isbn):
     return_value = {}
@@ -72,6 +71,12 @@ def get_book_by_isbn(isbn):
                 'price': book['price']
             }
     return jsonify(return_value)
+#PUT /books/ISBN
+@app.route("/books/<int:isbn>", methods=["PUT"])
+def edit_book(isbn):
+    data = request.get_json()
+
+    return jsonify(data)
 
 
 app.run(port=5000)
