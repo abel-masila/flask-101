@@ -78,9 +78,9 @@ def validPutBookObj(bookObj):
         return True
     else:
         return False
-# PUT /books/ISBN
+# PUT /books/ISBN -this requires user to send all the details about the entity
 @app.route("/books/<int:isbn>", methods=["PUT"])
-def edit_book(isbn):
+def replace_book(isbn):
     data = request.get_json()
     if (not validPutBookObj(data)):
         invalidBookObjErrorResponse = {
@@ -103,6 +103,22 @@ def edit_book(isbn):
             books[i] = new_book
         i += 1
     response = Response("", status=204)
+    return response
+
+# PATCH /books/ISBN
+@app.route("/books/<int:isbn>", methods=["PATCH"])
+def update_book(isbn):
+    data = request.get_json()
+    updated_book = {}
+    if ("name" in data):
+        updated_book["name"] = data["name"]
+    if ("price" in data):
+        updated_book["price"] = data["price"]
+    for book in books:
+        if (book["isbn"] == isbn):
+            book.update(updated_book)
+    response = Response("", status=204)
+    response.headers["Location"] = "/books/" + str(isbn)
     return response
 
 
