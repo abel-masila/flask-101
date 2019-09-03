@@ -71,12 +71,39 @@ def get_book_by_isbn(isbn):
                 'price': book['price']
             }
     return jsonify(return_value)
-#PUT /books/ISBN
+
+
+def validPutBookObj(bookObj):
+    if ("name" in bookObj and "price" in bookObj):
+        return True
+    else:
+        return False
+# PUT /books/ISBN
 @app.route("/books/<int:isbn>", methods=["PUT"])
 def edit_book(isbn):
     data = request.get_json()
+    if (not validPutBookObj(data)):
+        invalidBookObjErrorResponse = {
+            "error": "Valid book object must be passed in the request.",
+            "helpString": "Data passed in similar format to this {'name': 'js for dummies','price': 3423}"
+        }
+        response = Response(json.dumps(invalidBookObjErrorResponse),
+                            status=400, mimetype="application/json")
+        return response
 
-    return jsonify(data)
+    new_book = {
+        "name": data["name"],
+        "price": data["price"],
+        "isbn": isbn
+    }
+    i = 0
+    for book in books:
+        currentIsbn = book["isbn"]
+        if (currentIsbn == isbn):
+            books[i] = new_book
+        i += 1
+    response = Response("", status=204)
+    return response
 
 
 app.run(port=5000)
