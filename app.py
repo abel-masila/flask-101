@@ -128,8 +128,12 @@ def delete_book(isbn):
     for book in books:
         if (book["isbn"] == isbn):
             books.pop(i)
+            Response("", status=204)
         i += 1
-    return ""
+    errorMsg = {
+        "error": "Book with th ISBN number provided was not found"
+    }
+    return Response(json.dumps(errorMsg), status=404, mimetype="application/json")
 
 
 app.run(port=5000)
