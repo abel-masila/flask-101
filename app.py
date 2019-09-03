@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 app = Flask(__name__)
 
 books = [
@@ -21,10 +21,24 @@ def helloworld():
 
 
 #GET /books
-@app.route("/books")
+@app.route("/books", methods=['GET'])
 def get_books():
     return jsonify({'books': books})
-#GET /books/ISBN
+
+# sanitize user request
+
+
+def validBookObj(bookObj):
+    if ("name" in bookObj and "price" in bookObj and "isbn" in bookObj):
+        return True
+    else:
+        return False
+
+#POST /books
+@app.route("/books", methods=['POST'])
+def add_books():
+
+    #GET /books/ISBN
 
 
 @app.route("/books/<int:isbn>")
