@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Response
+import json
 app = Flask(__name__)
 
 books = [
@@ -50,7 +51,13 @@ def add_books():
         return response
 
     else:
-        return "False"
+        invalidBookObjErrorResponse = {
+            "error": "Invalid book object passed.",
+            "helpString": "Data passed in similar format to this {'name': 'js for dummies','isbn': 122343,'price': 3423}"
+        }
+        response = Response(json.dumps(invalidBookObjErrorResponse),
+                            status=400, mimetype="application/json")
+        return response
     # GET /books/ISBN
 
 
