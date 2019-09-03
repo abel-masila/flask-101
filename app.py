@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 app = Flask(__name__)
 
 books = [
@@ -20,7 +20,7 @@ def helloworld():
     return "Hello World"
 
 
-#GET /books
+# GET /books
 @app.route("/books", methods=['GET'])
 def get_books():
     return jsonify({'books': books})
@@ -34,16 +34,23 @@ def validBookObj(bookObj):
     else:
         return False
 
-#POST /books
+# POST /books
 @app.route("/books", methods=['POST'])
 def add_books():
     data = request.get_json()
     if (validBookObj(data)):
-        books.insert(0, data)
-        return "True"
+        new_book = {
+            "name": data["name"],
+            "price": data["price"],
+            "isbn": data["isbn"]
+        }
+        books.insert(0, new_book)
+        response = Response("", 201, mimetype="application/json")
+        return response
+
     else:
         return "False"
-    #GET /books/ISBN
+    # GET /books/ISBN
 
 
 @app.route("/books/<int:isbn>")
