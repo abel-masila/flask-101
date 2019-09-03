@@ -37,7 +37,12 @@ def validBookObj(bookObj):
 #POST /books
 @app.route("/books", methods=['POST'])
 def add_books():
-
+    data = request.get_json()
+    if (validBookObj(data)):
+        books.insert(0, data)
+        return "True"
+    else:
+        return "False"
     #GET /books/ISBN
 
 
