@@ -3,6 +3,7 @@ import json
 from settings import *
 import jwt
 import datetime
+from functools import wraps
 
 from BookModal import Book
 from UserModel import User
@@ -30,14 +31,24 @@ def get_token():
         return token
 
     return Response('', 401, mimetype='application/json')
+
+
+def token_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        token = request.args.get('token')
+        try:
+            jwt.decode(token, app.config['SECRET_KEY'])
+            return f(*args, **kwargs)
+        except:
+            return jsonify({'error': 'Valid token needed'})
+    return wrapper
+
 # GET /books
+
+
 @app.route("/books", methods=['GET'])
 def get_books():
-    token = request.args.get('token')
-    try:
-        jwt.decode(token, app.config['SECRET_KEY'])
-    except:
-        return jsonify({'error': 'Invalid token supplied'})
     return jsonify({'books': Book.get_all_books()})
 
 
@@ -50,6 +61,7 @@ def validBookObj(bookObj):
 
 # POST /books
 @app.route("/books", methods=['POST'])
+@token_required
 def add_books():
     data = request.get_json()
     if (validBookObj(data)):
@@ -83,6 +95,7 @@ def validPutBookObj(bookObj):
         return False
 # PUT /books/ISBN -this requires user to send all the details about the entity
 @app.route("/books/<int:isbn>", methods=["PUT"])
+@token_required
 def replace_book(isbn):
     data = request.get_json()
     if (not validPutBookObj(data)):
@@ -100,6 +113,7 @@ def replace_book(isbn):
 
 # PATCH /books/ISBN
 @app.route("/books/<int:isbn>", methods=["PATCH"])
+@token_required
 def update_book(isbn):
     data = request.get_json()
     if ("name" in data):
@@ -113,6 +127,7 @@ def update_book(isbn):
 
 # DELETE /books/ISBN
 @app.route("/books/<int:isbn>", methods=["DELETE"])
+@token_required
 def delete_book(isbn):
     if (Book.delete_book(isbn)):
         return Response("", status=204)
