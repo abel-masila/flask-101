@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, Response
 import json
-app = Flask(__name__)
+from settings import *
 
 books = [
     {
