@@ -2,18 +2,8 @@ from flask import Flask, jsonify, request, Response
 import json
 from settings import *
 
-books = [
-    {
-        'name': 'Java for dummies',
-        'price': 799,
-        'isbn': 343434
-    },
-    {
-        'name': 'C# for dummies',
-        'price': 699,
-        'isbn': 343433
-    }
-]
+from BookModal import *
+
 
 # Default route
 @app.route("/")
@@ -24,7 +14,7 @@ def helloworld():
 # GET /books
 @app.route("/books", methods=['GET'])
 def get_books():
-    return jsonify({'books': books})
+    return jsonify({'books': Book.get_all_books()})
 
 
 # sanitize user request
@@ -39,14 +29,10 @@ def validBookObj(bookObj):
 def add_books():
     data = request.get_json()
     if (validBookObj(data)):
-        new_book = {
-            "name": data["name"],
-            "price": data["price"],
-            "isbn": data["isbn"]
-        }
-        books.insert(0, new_book)
+
+        Book.add_book(data["name"], data["price"], data["isbn"])
         response = Response("", 201, mimetype="application/json")
-        response.headers["Location"] = "/books/" + str(new_book["isbn"])
+        response.headers["Location"] = "/books/" + str(data["isbn"])
         return response
 
     else:
@@ -62,14 +48,7 @@ def add_books():
 # GET /books/ISBN
 @app.route("/books/<int:isbn>")
 def get_book_by_isbn(isbn):
-    return_value = {}
-    for book in books:
-        if (book['isbn'] == isbn):
-            return_value = {
-                'name': book['name'],
-                'isbn': book['isbn'],
-                'price': book['price']
-            }
+    return_value = Book.get_book(isbn)
     return jsonify(return_value)
 
 
@@ -91,17 +70,7 @@ def replace_book(isbn):
                             status=400, mimetype="application/json")
         return response
 
-    new_book = {
-        "name": data["name"],
-        "price": data["price"],
-        "isbn": isbn
-    }
-    i = 0
-    for book in books:
-        currentIsbn = book["isbn"]
-        if (currentIsbn == isbn):
-            books[i] = new_book
-        i += 1
+    Book.replace_book(isbn, data["name"], data["price"])
     response = Response("", status=204)
     return response
 
@@ -109,14 +78,11 @@ def replace_book(isbn):
 @app.route("/books/<int:isbn>", methods=["PATCH"])
 def update_book(isbn):
     data = request.get_json()
-    updated_book = {}
     if ("name" in data):
-        updated_book["name"] = data["name"]
+        Book.update_book_name(isbn, data['name'])
     if ("price" in data):
-        updated_book["price"] = data["price"]
-    for book in books:
-        if (book["isbn"] == isbn):
-            book.update(updated_book)
+        Book.update_book_price(isbn, data['price'])
+
     response = Response("", status=204)
     response.headers["Location"] = "/books/" + str(isbn)
     return response
@@ -124,12 +90,8 @@ def update_book(isbn):
 # DELETE /books/ISBN
 @app.route("/books/<int:isbn>", methods=["DELETE"])
 def delete_book(isbn):
-    i = 0
-    for book in books:
-        if (book["isbn"] == isbn):
-            books.pop(i)
-            Response("", status=204)
-        i += 1
+    if (Book.delete_book(isbn)):
+        return Response("", status=204)
     errorMsg = {
         "error": "Book with th ISBN number provided was not found"
     }
