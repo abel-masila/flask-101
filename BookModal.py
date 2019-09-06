@@ -13,12 +13,15 @@ class Book(db.Model):
     price = db.Column(db.Float, nullable=False)
     isbn = db.Column(db.Integer)
 
+    def json(self):
+        return {'name': self.name, 'price': self.price, 'isbn': self.isbn}
+
     def add_book(_name, _price, _isbn):
         new_book = Book(name=_name, price=_price, isbn=_isbn)
         db.session.add(new_book)
 
     def get_all_books():
-        return Book.query.all()
+        return [book.json() for book in Book.query.all()]
 
     def get_book(_isbn):
         return Book.query.filter_by(isbn=_isbn).first()
