@@ -4,7 +4,8 @@ from settings import *
 import jwt
 import datetime
 
-from BookModal import *
+from BookModal import Book
+from UserModel import User
 
 app.config['SECRET_KEY'] = "admin"
 
@@ -15,12 +16,20 @@ def helloworld():
     return "Hello World"
 
 
-@app.route("/login")
+@app.route('/login', methods=['POST'])
 def get_token():
-    expiration_date = datetime.datetime.utcnow() + datetime.timedelta(seconds=100)
-    token = jwt.encode({'exp': expiration_date},
-                       app.config['SECRET_KEY'], algorithm='HS256')
-    return token
+    request_data = request.get_json()
+    username = str(request_data['username'])
+    password = str(request_data['password'])
+
+    match = User.username_password_match(username, password)
+    if match:
+        expiration_date = datetime.datetime.utcnow() + datetime.timedelta(seconds=100)
+        token = jwt.encode({'exp': expiration_date},
+                           app.config['SECRET_KEY'], algorithm='HS256')
+        return token
+
+    return Response('', 401, mimetype='application/json')
 # GET /books
 @app.route("/books", methods=['GET'])
 def get_books():
